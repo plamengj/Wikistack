@@ -10,7 +10,10 @@ const Page = db.define('page', {
     },
     urlTitle: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false, 
+        get() {
+            return "/wiki/" + this.getDataValue('urlTitle');
+        }
     },
     content: {
         type: Sequelize.TEXT,
@@ -23,13 +26,16 @@ const Page = db.define('page', {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
     }, 
-    route: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        get() {
-            return "/wiki/" + this.getDataValue('urlTitle');
-        }
-    }
+}, {
+   hooks: {
+       beforeValidate: (page, options) => {
+        if (page.title) {
+            page.urlTitle = page.title.replace(/\s+/g, '_').replace(/\W/g, '');
+          } else {
+            page.urlTitle = Math.random().toString(36).substring(2, 7);
+          }
+       }
+   } 
 });
 
 const User = db.define('user', {
